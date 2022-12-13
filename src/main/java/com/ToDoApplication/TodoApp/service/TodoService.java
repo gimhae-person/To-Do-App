@@ -4,6 +4,7 @@ import com.ToDoApplication.TodoApp.entity.Todos;
 import com.ToDoApplication.TodoApp.exception.BusinessLogicException;
 import com.ToDoApplication.TodoApp.exception.ExceptionCode;
 import com.ToDoApplication.TodoApp.repository.TodoRepository;
+import com.ToDoApplication.TodoApp.utils.CustomBeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -12,6 +13,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Transactional
@@ -19,9 +21,11 @@ import java.util.Optional;
 public class TodoService {
 
     private final TodoRepository todoRepository;
+    private final CustomBeanUtils<Todos> beanUtils;
 
-    public TodoService(TodoRepository todoRepository) {
+    public TodoService(TodoRepository todoRepository, CustomBeanUtils<Todos> beanUtils) {
         this.todoRepository = todoRepository;
+        this.beanUtils = beanUtils;
     }
 
     public Todos createTodo(Todos todo) {
@@ -34,14 +38,7 @@ public class TodoService {
     public Todos updateTodo(Todos todo) {
         Todos findTodo = findVerifiedTodo(todo.getTodoId());
 
-        Optional.ofNullable(todo.getTitle())
-                .ifPresent(findTodo::setTitle);
-        Optional.ofNullable(todo.getTodo_order())
-                .ifPresent(findTodo::setTodo_order);
-        Optional.ofNullable(todo.isCompleted())
-                .ifPresent(findTodo::setCompleted);
-
-        findTodo.setTitle(todo.getTitle());
+        Todos updateingTodo = beanUtils.copyNonNullProperties(todo, findTodo);
 
         return todoRepository.save(findTodo);
     }
@@ -51,8 +48,8 @@ public class TodoService {
         return findVerifiedTodo(todoId);
     }
 
-    public Page<Todos> findTodos(int page, int size) {
-        return todoRepository.findAll(PageRequest.of(page, size, Sort.by("todoId").descending()));
+    public List<Todos> findTodos() {
+        return todoRepository.findAll();
     }
 
     public void deleteTodo(long todoId) {

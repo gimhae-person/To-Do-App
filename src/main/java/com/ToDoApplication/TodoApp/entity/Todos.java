@@ -18,7 +18,7 @@ public class Todos {
     @Column(nullable = false, unique = true)
     private String title;
 
-    @Column(nullable = false, unique = true)
+    @Column(unique = true)
     private int todo_order;
 
     @Column(nullable = false)

@@ -1,7 +1,5 @@
 package com.ToDoApplication.TodoApp.controller;
 
-import com.ToDoApplication.TodoApp.dto.MutiResponseDto;
-import com.ToDoApplication.TodoApp.dto.SingleResponseDto;
 import com.ToDoApplication.TodoApp.dto.TodoDto;
 import com.ToDoApplication.TodoApp.entity.Todos;
 import com.ToDoApplication.TodoApp.mapper.TodoMapper;
@@ -36,7 +34,7 @@ public class TodoController {
 
         Todos createTodo = todoService.createTodo(todo);
         TodoDto.Response response = mapper.todoToTodoResponse(createTodo);
-        return new ResponseEntity<>(new SingleResponseDto<>(response), HttpStatus.CREATED);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @PatchMapping("/{todoId}")
@@ -47,23 +45,19 @@ public class TodoController {
         Todos todo =
                 todoService.updateTodo(mapper.todoPatchToTodo(requestBody));
 
-        return new ResponseEntity<>(
-                new SingleResponseDto<>(mapper.todoToTodoResponse(todo)), HttpStatus.OK);
+        return new ResponseEntity<>((mapper.todoToTodoResponse(todo)), HttpStatus.OK);
     }
 
     @GetMapping("/{todoId}")
     public ResponseEntity getTodo(@PathVariable("todoId") @Positive long todoId){
         Todos todo = todoService.findTodo(todoId);
-        return new ResponseEntity<>(
-                new SingleResponseDto<>(mapper.todoToTodoResponse(todo)), HttpStatus.OK);
+        return new ResponseEntity<>((mapper.todoToTodoResponse(todo)), HttpStatus.OK);
     }
 
     @GetMapping
-    public ResponseEntity getTodos(@Positive @RequestParam int page,
-                                   @Positive @RequestParam int size){
-        Page<Todos> pageTodos = todoService.findTodos(page-1, size);
-        List<Todos> todos = pageTodos.getContent();
-        return new ResponseEntity<>(new MutiResponseDto<>(mapper.todosToTodoResponses(todos), pageTodos), HttpStatus.OK);
+    public ResponseEntity getTodos(){
+        List<Todos> todos = todoService.findTodos();
+        return new ResponseEntity<>(mapper.todosToTodoResponses(todos), HttpStatus.OK);
     }
 
     @DeleteMapping("/{todoId}")
